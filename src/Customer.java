@@ -4,14 +4,26 @@ import java.util.Set;
 class Customer {
     private String name;
     private Set<String> tickets;
+    private String reservationCode;
 
     public Customer(String name) {
         this.name = name;
         this.tickets = new HashSet<>();
+        this.reservationCode = null;
+    }
+
+    public Customer(String name, String reservationCode) {
+        this.name = "Gość_" + reservationCode;
+        this.tickets = new HashSet<>();
+        this.reservationCode = reservationCode;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getReservationCode() {
+        return reservationCode;
     }
 
     public void addTicket(String seat) {

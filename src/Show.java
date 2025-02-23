@@ -1,88 +1,71 @@
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 class Show {
     private Movie movie;
     private Date dateTime;
-    private String hallName;
-    private Set<String> reservedSeats;
-    private Set<String> purchasedTickets;  // Zbiór zakupionych biletów
+    private CinemaHall hall;
+    private Map<String, Customer> reservedSeats;
+    private Map<String, Customer> purchasedTickets;
     private boolean is3D;
     private boolean isVIP;
 
-    public Show(Movie movie, Date dateTime, boolean is3D, boolean isVIP) {
-        this.movie = movie;
+    public Show(String movieTitle, Date dateTime, CinemaHall hall, boolean is3D, boolean isVIP, Multipleks multiplex) {
+        this.movie = multiplex.getMovieByTitle(movieTitle);
         this.dateTime = dateTime;
-        this.hallName = hallName;
-        this.reservedSeats = new HashSet<>();
-        this.purchasedTickets = new HashSet<>();
+        this.hall = hall;
+        this.reservedSeats = new HashMap<>();
+        this.purchasedTickets = new HashMap<>();
         this.is3D = is3D;
         this.isVIP = isVIP;
     }
 
-    public String getHallName() {
-        return hallName;
-    }
-
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public Date getDateTime() {
-        return dateTime;
-    }
-
     public void reservePlaces(Customer customer, String... seats) {
-        if (customer != null) {
-            // Jeżeli klient jest zarejestrowany, to przypisujemy rezerwacje do klienta
-            for (String seat : seats) {
-                if (reservedSeats.contains(seat)) {
-                    System.out.println("Miejsce " + seat + " jest już zarezerwowane.");
-                } else {
-                    reservedSeats.add(seat);
-                    customer.addTicket(seat);  // Dodajemy miejsce do biletów klienta
-                    System.out.println("Miejsce " + seat + " zostało zarezerwowane przez klienta " + customer.getName());
-                }
-            }
-        } else {
-            // Jeżeli klient nie jest zarejestrowany (null), rezerwujemy tylko miejsce
-            for (String seat : seats) {
-                if (reservedSeats.contains(seat)) {
-                    System.out.println("Miejsce " + seat + " jest już zarezerwowane.");
-                } else {
-                    reservedSeats.add(seat);
-                    System.out.println("Miejsce " + seat + " zostało zarezerwowane.");
-                }
-            }
-        }
-    }
-
-    public void purchaseTicket(String seat, Customer customer) {
-        if (reservedSeats.contains(seat)) {
-            System.out.println("Miejsce " + seat + " jest już zarezerwowane, nie można go kupić.");
-        } else if (purchasedTickets.contains(seat)) {
-            System.out.println("Bilet na miejsce " + seat + " został już zakupiony.");
-        } else {
-            purchasedTickets.add(seat);
-            if (customer != null) {
+        for (String seat : seats) {
+            if (reservedSeats.containsKey(seat) || purchasedTickets.containsKey(seat)) {
+                System.out.println("Miejsce " + seat + " jest już zajęte.");
+            } else {
+                reservedSeats.put(seat, customer);
                 customer.addTicket(seat);
+                System.out.println("Miejsce " + seat + " zostało zarezerwowane przez " + customer.getName());
+
+                if (customer.getReservationCode() != null) {
+                    System.out.println("Kod rezerwacji dla gościa: " + customer.getReservationCode());
+                }
             }
-            System.out.println("Bilet na miejsce " + seat + " został zakupiony.");
         }
     }
 
-    public boolean is3D() {
-        return is3D;
-    }
+    public void purchaseTicket(Customer customer, String seat) {
+        if (purchasedTickets.containsKey(seat)) {
+            System.out.println("Bilet na miejsce " + seat + " został już zakupiony.");
+            return;
+        }
 
-    public boolean isVIP() {
-        return isVIP;
+        if (reservedSeats.containsKey(seat)) {
+            Customer reservedBy = reservedSeats.get(seat);
+            if (!reservedBy.equals(customer)) {
+                System.out.println("Miejsce " + seat + " jest zarezerwowane przez " + reservedBy.getName());
+                return;
+            } else {
+                System.out.println("Miejsce " + seat + " jest już zarezerwowane przez ciebie. Przechodzę do zakupu.");
+            }
+        }
+
+        purchasedTickets.put(seat, customer);
+        reservedSeats.remove(seat);
+        customer.addTicket(seat);
+        System.out.println("Bilet na miejsce " + seat + " został zakupiony przez " + customer.getName());
+
+        if (customer.getReservationCode() != null) {
+            System.out.println("Kod odbioru biletu dla gościa: " + customer.getReservationCode());
+        }
     }
 
     @Override
     public String toString() {
-        return movie.getTitle() + " - " + dateTime.toString() + " w " + hallName
+        return movie.getTitle() + " - " + dateTime.toString() + " w " + hall.getName()
                 + (is3D ? " [3D]" : "") + (isVIP ? " [VIP]" : "");
     }
 }

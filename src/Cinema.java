@@ -6,7 +6,7 @@ class Cinema {
     private String address;
     private List<CinemaHall> halls;
 
-    public Cinema(String name, String address) {
+    public Cinema(String name, String address, Multipleks multiplex) {
         this.name = name;
         this.address = address;
         this.halls = new ArrayList<>();
@@ -23,16 +23,5 @@ class Cinema {
                 System.out.println(screening);
             }
         }
-    }
-
-    public Movie findMovie(String title) {
-        for (CinemaHall hall : halls) {
-            for (Show screening : hall.getShows()) {
-                if (screening.getMovie().getTitle().equalsIgnoreCase(title)) {
-                    return screening.getMovie();
-                }
-            }
-        }
-        return null;
     }
 }

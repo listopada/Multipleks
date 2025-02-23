@@ -1,6 +1,3 @@
-import java.util.*;
-
-// Klasa reprezentująca film
 class Movie {
     private String title;
     private String description;
